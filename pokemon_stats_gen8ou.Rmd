@@ -2,7 +2,7 @@
 title: "Pokemon Stats Gen8 OU"
 author: "Edward DeWane"
 date: "2023-10-23"
-output: html_document
+output: github_document
 ---
 Data Prep
 
