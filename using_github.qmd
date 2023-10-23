@@ -1,0 +1,129 @@
+---
+title: "Getting Going With GitHub"
+format:
+  html:
+    toc: true
+    toc-location: left
+    theme: vapor
+    self-contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Git is a version control software. Specifically, Git is a distributed repository system -- when you **clone** a repository, you are getting the complete repository. This is in contrast to a centralized repository system, in which you are getting only one particular version of a project. Both types are perfectly valid, but Git, and the services that utilize it, are likely more common.
+
+GitHub is a specific service that utilizes Git. It is not the only service that wraps around Git: Bitbucket and Gitlab are two things you might encounter.
+
+# Install Git
+
+Before you can really get started with GitHub, you need to download <a href="https://git-scm.com/downloads">Git</a>. Just step through your normal download process for your specific OS. 
+
+If you are using a Mac and want to go through the terminal, you can follow the advice <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">here</a>.
+
+Next, open your RStudio and go to "Tools" and then "Global Options...". You will then navigate to the Git/SVN tab and make sure you have your Git executable in the proper field: it is likely "/usr/local/bin/git" on a Mac and "C:/Program Files/Git/bin/git.exe" on Windows.
+
+Once it is there, just click the "Apply" button.
+
+# Create A Github Account
+
+Likely the easiest step -- just go <a href="https://github.com/">here</a> and signup. 
+
+# Link Accounts
+
+After you have Git installed and a Github account, you will need to link them together on your machine.
+
+If you are on a Mac, open your terminal. If you are on Windows, open Git Bash (or the command prompt if you are having trouble finding the Bash terminal). Remember that you can use the terminal that comes packaged in RStudio, but any terminal will do.
+
+Once you have your terminal open, type the following:
+
+```
+git config --global user.name edward-dewane
+```
+
+And then:
+
+```
+git config --global user.email edewane2@gmail.com
+```
+
+You'll also need to pass along your unique GitHub key. 
+
+1. Go into your GitHub account settings
+
+2. Find the "Developer Setting" -- it is towards the bottom
+
+3. Click on "Personal Access Tokens"
+
+4. Click on "Tokens (classic)"
+
+5. Generate a new token
+
+# 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
+
+6. If you are using a Mac, you will need to add this to your Keychain Access
+
+  -   https://gist.github.com/jonjack/bf295d4170edeb00e96fb158f9b1ba3c
+  
+  -   Windows is pretty easy
+  
+7. Whenever you are prompted for a password, enter your PAT, not your actual password.
+
+# Create Repo
+
+Now we have an age-old question -- create a project on Github first or elsewhere? I personally find it easier to create something on Github, clone the project, and start adding code from there. 
+
+If, however, you want to associate an existing project with Github, you will still need to create a Github project, but follow these steps next:
+
+```
+git remote add origin https://github.com/yourUserName/projectName.git
+
+git pull origin master
+
+git push -u origin master
+```
+
+No matter the route we take, we should have a project on Github and an RStudio project associated with the Github project.
+
+# Code
+
+Let's create a starter project. You can go <a href="https://github.com/saberry/github_workshop">here</a> and clone the entire repo into a new RStudio project!
+
+1.    Click on the green "Code" button
+
+2.    Copy the url -- https://github.com/saberry/github_workshop.git
+
+3.    Click "New Project..." in RStudio
+
+4.    Click "Version Control"
+
+5.    Click "Git"
+
+6.    Paste the url into the "Repository URL:" field
+
+7.    Create your project.
+
+# Commit
+
+Once you make some changes, you can click on your Git tab in RStudio and hit the check button next to the file. After that, you can hit the "Commit" button. Give your commit and message, then click commit.
+
+# Push
+
+After you commit, your changes are ready to be pushed. This will put them up on Github.
+
+# Pull
+
+Once you start working with other people, you will always want to pull before you start working -- this will put the most recent version of the files into your local version. 
+
+# Collaboration
+
+In GitHub:
+
+Settings > Manage access > Invite a collaborator
+
+Invite all of your friends to join the project!
+
+# Pull Requests
+
+If you don't want to collaborate with someone, you can clone a project, make changes, and then create a pull request. Once the owner of the repository agrees with the request, your changes will be merged into their respository.
