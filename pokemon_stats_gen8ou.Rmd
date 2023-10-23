@@ -1,0 +1,264 @@
+---
+title: "Pokemon Stats Gen8 OU"
+author: "Edward DeWane"
+date: "2023-10-23"
+output: html_document
+---
+Data Prep
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+# this file is the usage statistics of pokemon used comptetitively in August 2023.
+usage <- read.delim("https://www.smogon.com/stats/2023-08/gen8ou-0.txt" ,sep ="|", header = FALSE)
+
+# the following files were downloaded from github, and they contain general information about pokemon
+pokemon <- read.csv("C:/Users/edewa/Downloads/Pokemon Project Data/pokemon.csv")
+
+typeids <- read.csv("C:/Users/edewa/Downloads/Pokemon Project Data/types.csv")
+
+pokemontypes <- read.csv("C:/Users/edewa/Downloads/Pokemon Project Data/pokemon_types.csv")
+
+stats <- read.csv("C:/Users/edewa/Downloads/pokemon_stats.csv")
+
+typechart <- read.csv("C:/Users/edewa/Downloads/Pokemon Project Data/typechart.csv")
+
+#pivoting data so there is only 1 row for each pokemon
+pokemontypes <- reshape(pokemontypes, idvar = "pokemon_id", timevar = "slot", direction = "wide")
+
+#changing out numbers type id numbers with type names
+test2 <- merge(pokemontypes, typeids, by.x = "type_id.1", by.y = "id" )
+
+
+test3 <- merge(pokemontypes, typeids, by.x = "type_id.2", by.y = "id", all = TRUE )
+
+## these rows are special types that are only in spinoff games
+test3 <- test3[-c(585,584),]
+
+colnames(test2)[4] = "type1"
+colnames(test3)[4] = "type2"
+test2 <- test2[,c(2,4)]
+test3 <- test3[,c(2,4)]
+
+
+test4 <- merge(test2, test3, by = "pokemon_id")
+
+pokemondf <- pokemon[,c(1,2)]
+
+
+pokemondf <-  merge(pokemondf, test4, by.x = "id", by.y = "pokemon_id")
+
+#pokemon df now contains all pokemon's names, id number, and type(s)
+
+#the usage data needs lots of reformatting
+usage <- usage[-c(1,2,3,5, 652),]
+usage <- usage[,-1]
+library(janitor)
+
+usage <- usage %>% 
+  row_to_names(row_number = 1)
+usage <- usage[,c(2,3)]
+
+# need to make the usage percent into numeric data
+usage$` Usage %   ` <- gsub("%", "", usage$` Usage %   `)
+colnames(usage)[2] <- "usage%"
+
+usage$`usage%` <- as.numeric(usage$`usage%`)
+
+#renaming columns for ease of use
+colnames(usage)[1] <- "pokemon"
+colnames(usage)[2] <- "usage_pct"
+
+#have to make pokemon names match so that the data can be merged.
+
+usage$pokemon <- toupper(usage$pokemon)
+pokemondf$identifier <- toupper(pokemondf$identifier)
+
+
+## the names are mostly the same, but there are about 40ish pokemon that I have to manually make match
+usage$pokemon <- gsub("'", "", usage$pokemon)
+
+usage$pokemon <- gsub("%", "", usage$pokemon)
+
+usage$pokemon <- gsub("MEOWSTIC", "MEOWSTIC-MALE", usage$pokemon)
+
+usage$pokemon <- gsub("INDEEDEE-F", "INDEEDEE-FEMALE", usage$pokemon)
+
+pokemondf$identifier <- gsub("INDEEDEE-MALE" , "INDEEDEE", pokemondf$identifier)
+
+pokemondf[nrow(pokemondf),] = c("","SILVALLY-STEEL","steel",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-ELECTRIC","electric",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-WATER","water",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-GROUND","ground",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-DRAGON","dragon",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-DARK","dark",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-FAIRY","fairy",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-POISON","poison",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-GHOST","ghost",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-GRASS","GRASS",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-FIGHTING","fighting",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-FLYING","flying",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-ICE","ice",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-PSYCHIC","psychic",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-FIRE","fire",NA)
+pokemondf[nrow(pokemondf)+1,] = c("","SILVALLY-BUG","bug",NA)
+pokemondf$type1 <- gsub("GRASS", "grass", pokemondf$type1)
+
+usage$pokemon <- gsub(" ", "", usage$pokemon)
+usage$pokemon <- gsub("AEGISLASH", "AEGISLASH-BLADE", usage$pokemon)
+usage$pokemon <- gsub("BASCULIN", "BASCULIN-RED-STRIPED", usage$pokemon)
+usage$pokemon <- gsub("DARMANITAN", "DARMANITAN-STANDARD", usage$pokemon)
+usage$pokemon <- gsub("EISCUE", "EISCUE-ICE", usage$pokemon)
+usage$pokemon <- gsub("GOURGEIST", "GOURGEIST-AVERAGE", usage$pokemon)
+usage$pokemon <- gsub("KELDEO", "KELDEO-ORDINARY", usage$pokemon)
+usage$pokemon <- gsub("-AVERAGE-", "-", usage$pokemon)
+pokemondf$identifier <- gsub("LYCANROC-MIDDAY", "LYCANROC", pokemondf$identifier)
+usage$pokemon <- gsub("MIMEJR.", "MIME-JR", usage$pokemon)
+usage$pokemon <- gsub("MIMIKYU", "MIMIKYU-BUSTED", usage$pokemon)
+usage$pokemon <- gsub("MR.", "MR-", usage$pokemon)
+usage$pokemon <- gsub("MORPEKO", "MORPEKO-HANGRY", usage$pokemon)
+usage$pokemon <- gsub("NIDORANM", "NIDORAN-M", usage$pokemon)
+usage$pokemon <- gsub("TAPU", "TAPU-", usage$pokemon)
+pokemondf$identifier <- gsub("-INCARNATE", "", pokemondf$identifier)
+usage$pokemon <- gsub("TOXTRICITY", "TOXTRICITY-AMPED", usage$pokemon)
+usage$pokemon <- gsub(":", "-", usage$pokemon)
+usage$pokemon <- gsub("WISHIWASHI", "WISHIWASHI-SCHOOL", usage$pokemon)
+
+
+#finally we can merge!
+
+pokemon_type_usage <-  merge(usage, pokemondf, by.x = "pokemon", by.y = "identifier", all.x = TRUE, all.y = FALSE)
+
+
+# lets also merge the base stat total while we're at it.
+stats <- aggregate(stats$base_stat~stats$pokemon_id, FUN = 'sum')
+
+colnames(stats)[1] = "id"
+
+colnames(stats)[2] = "stats"
+
+pokemon_usage_bst <-  merge(pokemon_type_usage, stats, by.x = "id", by.y = "id")
+
+# we lose about 17 pokemon in this merge because the data with pokemon ids does not give one for each silvally form, but Silvally is not even remotely relevant so I don't care.
+
+```
+
+
+What percent of teams have each Pokemon?
+```{r}
+pokemon_type_usage[order(-pokemon_type_usage$usage_pct),]
+```
+
+
+What types are most common?
+```{r}
+## I am summing up the usage percent for each primary type
+type1pct <- aggregate(pokemon_type_usage$usage_pct~pokemon_type_usage$type1, FUN = 'sum')
+# Now I am doing the same for pokemon with secondary typings
+type2pct <- aggregate(pokemon_type_usage$usage_pct~pokemon_type_usage$type2, FUN = 'sum', na.action = na.omit)
+#Now I am adding them together
+type1pct$`pokemon_type_usage$usage_pct` <- type1pct$`pokemon_type_usage$usage_pct` + type2pct$`pokemon_type_usage$usage_pct`
+
+typeusage <- type1pct
+#renaming columns for clarity
+colnames(typeusage)[1] <- 'Type'
+colnames(typeusage)[2] <- 'Usage'
+
+library(ggplot2)
+
+ ggplot(data = typeusage, 
+       mapping = aes(x = reorder(Type, -Usage), y = Usage )) +
+  geom_bar(stat = "identity")+
+  scale_x_discrete(guide = guide_axis(n.dodge=2))+
+  xlab("Type") + ylab(" Sum of Usage%")+
+  theme_minimal()
+```
+
+Is Base Stat Total a Good Predictor of Usage?
+
+```{r}
+ggplot(data = pokemon_usage_bst, mapping =  aes(x = pokemon_usage_bst$stats, y = pokemon_usage_bst$usage_pct)) +
+  geom_point()+
+  xlab("Base Stat Total") + ylab("Usage Percentage")+
+  geom_smooth(method = 'lm', se = F )+
+  theme_minimal()
+
+
+
+summary(lm(formula = usage_pct~stats, data = pokemon_usage_bst))
+```
+
+It is not a very good predictor, but it looks like all Pokemon with at least 5% usage have a Base Stat Total of at least 440.
+
+Now I want to glean some insights to help me build a great team. What types do the most damage overall to the Pokemon used, weighted by their usage percent?
+
+```{r}
+typeeffectivenessdf <- data.frame(matrix(ncol = 18, nrow = 1))
+
+#have a column for each type
+colnames(typeeffectivenessdf) <- typechart[,1]
+
+#i used tester to figure out how to do this, but then I never bothered chaging back to typeeffectivenessdf
+
+tester <- typeeffectivenessdf
+#set initial damage values to zero
+tester[1,] <- 0
+
+library(stringr)
+#make type names have caps to match tester
+pokemon_type_usage$type1 <- str_to_title(pokemon_type_usage$type1)
+pokemon_type_usage$type2 <- str_to_title(pokemon_type_usage$type2)
+
+# for each pokemon that was used, it multiplies its usage% by the damage it would take from each type, and adds that to that type's column in the tester table. 
+
+
+
+for(j in 1:646){
+ if(is.na(pokemon_type_usage$type2[j])){
+   
+   for(i in 1:18){
+     tester[1,i] <-  tester[1,i] + pokemon_type_usage$usage_pct[j]*typechart[ i,(names(typechart) %in% pokemon_type_usage$type1[j])]
+   }
+     }else{
+   
+for(i in 1:18){
+  tester[1,i] <-  tester[1,i] + pokemon_type_usage$usage_pct[j]*typechart[ i,(names(typechart) %in% pokemon_type_usage$type1[j])]*typechart[ i,(names(typechart) %in% pokemon_type_usage$type2[j])]
+    
+}
+  
+}
+}
+#i put the contents of tester back into typeeffectivenessdf, but then did more mainpulations on it to make a plot of my data, and I used tester
+
+typeeffectivenessdf <- tester
+
+typeeffectivenessdf[2,] <- typeeffectivenessdf[1,]
+typeeffectivenessdf[1,] <- colnames(typeeffectivenessdf)
+
+#rotating data to be long so I can use ggplot
+tester <- t(typeeffectivenessdf)
+
+
+
+
+tester <- as.data.frame(tester)
+
+tester[,2] <- as.numeric(tester[,2])
+
+colnames(tester)[1] <- "Type"
+colnames(tester)[2] <- "Damage"
+
+tester <- tester[order(tester$Damage, decreasing = TRUE),]
+
+ggplot(data = tester, 
+       mapping = aes(x = reorder(Type, -Damage), y = Damage )) +
+       geom_bar(stat = "identity")+
+       scale_x_discrete(guide = guide_axis(n.dodge=2))+
+       xlab("Type") + ylab("Overall Damage")+
+       theme_minimal()
+```
+
